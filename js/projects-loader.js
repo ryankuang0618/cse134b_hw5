@@ -1,7 +1,7 @@
 const ProjectsLoader = {
   // Configuration
   LOCAL_STORAGE_KEY: 'projectsData',
-  REMOTE_URL: 'https://my-json-server.typicode.com/ryankuang0618/cse134b_hw5',
+  REMOTE_URL: 'https://my-json-server.typicode.com/ryankuang0618/cse134b_hw5/projects',
  
   init() {
     this.container = document.getElementById('projects-container');
