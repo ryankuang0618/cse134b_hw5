@@ -2,6 +2,7 @@ const ProjectCRUD = {
   LOCAL_STORAGE_KEY: 'projectsData',
   REMOTE_URL: 'https://my-json-server.typicode.com/ryankuang0618/cse134b_hw5/projects',
   currentSource: 'local',
+  remoteCache: null,
 
   init() {
     this.createForm = document.getElementById('create-form');
@@ -88,8 +89,9 @@ const ProjectCRUD = {
       this.sourceLocalBtn.style.opacity = '0.6';
       this.sourceRemoteBtn.style.background = 'linear-gradient(135deg, #2563eb, #60a5fa)';
       this.sourceRemoteBtn.style.opacity = '1';
-      this.currentSourceDisplay.textContent = '(Using Remote - Read Only)';
-      this.showMessage('ℹ️ Switched to Remote Server (Note: Changes are simulated)', 'info');
+      this.currentSourceDisplay.textContent = '(Using Remote - Cached)';
+      this.showMessage('ℹ️ Switched to Remote (changes cached for this session)', 'info');
+      this.remoteCache = null;
     }
     
     this.loadProjects();
@@ -109,6 +111,12 @@ const ProjectCRUD = {
   },
 
   loadRemoteProjects() {
+    if (this.remoteCache) {
+      this.displayProjects(this.remoteCache);
+      this.populateSelectDropdown(this.remoteCache);
+      return;
+    }
+
     const xhr = new XMLHttpRequest();
     xhr.open('GET', this.REMOTE_URL, true);
 
@@ -116,8 +124,9 @@ const ProjectCRUD = {
       if (xhr.status === 200) {
         try {
           const projects = JSON.parse(xhr.responseText);
-          this.displayProjects(projects);
-          this.populateSelectDropdown(projects);
+          this.remoteCache = [...projects];
+          this.displayProjects(this.remoteCache);
+          this.populateSelectDropdown(this.remoteCache);
         } catch (error) {
           this.showMessage('❌ Error loading remote data', 'error');
         }
@@ -197,9 +206,14 @@ const ProjectCRUD = {
       this.loadProjects();
       this.showMessage(`✓ Project "${newProject.title}" created in Local Storage!`, 'success');
     } else {
+      if (!this.remoteCache) {
+        this.remoteCache = [];
+      }
+      this.remoteCache.push(newProject);
       this.simulateRemoteCreate(newProject);
       this.createForm.reset();
-      this.showMessage(`ℹ️ Project "${newProject.title}" sent to remote server (simulated)`, 'info');
+      this.loadProjects();
+      this.showMessage(`✓ Project "${newProject.title}" created (cached for session)!`, 'success');
     }
   },
 
@@ -223,40 +237,24 @@ const ProjectCRUD = {
       return;
     }
 
+    let projects;
     if (this.currentSource === 'local') {
       const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
-      const projects = data ? JSON.parse(data) : [];
-      const project = projects[parseInt(index)];
-
-      if (!project) return;
-
-      document.getElementById('update-title').value = project.title || '';
-      document.getElementById('update-description').value = project.description || '';
-      document.getElementById('update-image').value = project.image || '';
-      document.getElementById('update-tech').value = project.tech || '';
-      document.getElementById('update-role').value = project.role || '';
-      document.getElementById('update-date').value = project.date || '';
-      document.getElementById('update-link').value = project.link || '';
+      projects = data ? JSON.parse(data) : [];
     } else {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', this.REMOTE_URL, false);
-      xhr.send();
-      
-      if (xhr.status === 200) {
-        const projects = JSON.parse(xhr.responseText);
-        const project = projects[parseInt(index)];
-        
-        if (!project) return;
-        
-        document.getElementById('update-title').value = project.title || '';
-        document.getElementById('update-description').value = project.description || '';
-        document.getElementById('update-image').value = project.image || '';
-        document.getElementById('update-tech').value = project.tech || '';
-        document.getElementById('update-role').value = project.role || '';
-        document.getElementById('update-date').value = project.date || '';
-        document.getElementById('update-link').value = project.link || '';
-      }
+      projects = this.remoteCache || [];
     }
+    
+    const project = projects[parseInt(index)];
+    if (!project) return;
+
+    document.getElementById('update-title').value = project.title || '';
+    document.getElementById('update-description').value = project.description || '';
+    document.getElementById('update-image').value = project.image || '';
+    document.getElementById('update-tech').value = project.tech || '';
+    document.getElementById('update-role').value = project.role || '';
+    document.getElementById('update-date').value = project.date || '';
+    document.getElementById('update-link').value = project.link || '';
   },
 
   clearUpdateForm() {
@@ -297,9 +295,14 @@ const ProjectCRUD = {
       this.loadProjects();
       this.showMessage(`✓ Project "${updatedProject.title}" updated in Local Storage!`, 'success');
     } else {
-      updatedProject.id = Date.now();
-      this.simulateRemoteUpdate(updatedProject);
-      this.showMessage(`ℹ️ Project "${updatedProject.title}" update sent to remote (simulated)`, 'info');
+      const index = parseInt(selectedIndex);
+      if (this.remoteCache && this.remoteCache[index]) {
+        updatedProject.id = this.remoteCache[index].id;
+        this.remoteCache[index] = updatedProject;
+        this.simulateRemoteUpdate(updatedProject);
+        this.loadProjects();
+        this.showMessage(`✓ Project "${updatedProject.title}" updated (cached)!`, 'success');
+      }
     }
   },
 
@@ -346,21 +349,19 @@ const ProjectCRUD = {
       this.loadProjects();
       this.showMessage(`✓ Project "${projectToDelete.title}" deleted from Local Storage!`, 'success');
     } else {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', this.REMOTE_URL, false);
-      xhr.send();
-      
-      if (xhr.status === 200) {
-        const projects = JSON.parse(xhr.responseText);
-        projectToDelete = projects[parseInt(selectedIndex)];
+      const index = parseInt(selectedIndex);
+      if (this.remoteCache && this.remoteCache[index]) {
+        projectToDelete = this.remoteCache[index];
         
-        const confirmed = confirm(`Are you sure you want to delete "${projectToDelete.title}" from remote?`);
+        const confirmed = confirm(`Are you sure you want to delete "${projectToDelete.title}"?`);
         if (!confirmed) return;
         
         this.simulateRemoteDelete(projectToDelete.id);
+        this.remoteCache.splice(index, 1);
         this.clearUpdateForm();
         this.selectProject.value = '';
-        this.showMessage(`ℹ️ Delete request sent to remote server (simulated)`, 'info');
+        this.loadProjects();
+        this.showMessage(`✓ Project "${projectToDelete.title}" deleted (cached)!`, 'success');
       }
     }
   },
