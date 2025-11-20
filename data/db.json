@@ -1,0 +1,46 @@
+{
+    "projects": [
+      {
+        "id": 1,
+        "title": "LoopGen For Runners",
+        "image": "assets/images/loopgen4runners.jpg",
+        "description": "This project builds an adaptive running-music system that predicts a runner's future speed using physiological data and generates loopable music synchronized to the predicted BPM.",
+        "tech": "Python, Long Short-Term Memory (LSTM) Networks, Regression model",
+        "role": "ML Engineer",
+        "date": "2025",
+        "link": "https://drive.google.com/file/d/14lKR9d3Bu-8HKJTI3JRJKoGDi3Df3xe/view?usp=sharing"
+      },
+      {
+        "id": 2,
+        "title": "Floating Water Exploration Device",
+        "image": "assets/images/floating_device.jpeg",
+        "description": "A device that allows users to explore water bodies by floating on the surface. It is equipped with a camera and a Raspberry Pi to capture images and videos of the water body.",
+        "tech": "C++, Raspberry Pi",
+        "role": "Software Developer",
+        "date": "2025",
+        "link": "https://drive.google.com/presentation/d/1RLLeFHLyPgpTN82_ndyeN4ho1BGsM01/edit?usp=sharing&ouid=107411627366954165253&rtpof=true&sd=true"
+      },
+      {
+        "id": 3,
+        "title": "UCSD Event Finder Website",
+        "image": "assets/images/event_finder.png",
+        "description": "A website that allows users to find events at UCSD. It is built with TypeScript, JavaScript, HTML, and CSS.",
+        "tech": "TypeScript, JavaScript, HTML, CSS",
+        "role": "Frontend Developer",
+        "date": "2025",
+        "link": "https://github.com/ryankuang0618/CSE210-Event-Frontend"
+      },
+      {
+        "id": 4,
+        "title": "Smart Glasses",
+        "image": "assets/images/smart_glasses.jpg",
+        "description": "Wearable device with real-time image translation and navigation using Python and GCP. This project translates signs in real time and helps users navigate foreign cities.",
+        "tech": "Python, Firebase, Google Cloud Platform",
+        "role": "Full-stack Developer",
+        "date": "2019-2020",
+        "link": "https://github.com/ryankuang0618/smart_glasses_project"
+      }
+    ]
+  }
+  
+  
