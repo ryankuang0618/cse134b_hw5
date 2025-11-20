@@ -1,16 +1,8 @@
-/**
- * Projects Data Loader
- * Handles loading project data from localStorage and remote server
- */
-
 const ProjectsLoader = {
   // Configuration
   LOCAL_STORAGE_KEY: 'projectsData',
-  REMOTE_URL: 'https://my-json-server.typicode.com/ryankuang0618/cse134b_hw5/projects',
-  
-  /**
-   * Initialize the loader and set up event listeners
-   */
+  REMOTE_URL: 'https://my-json-server.typicode.com/ryankuang0618/cse134b_hw5',
+ 
   init() {
     this.container = document.getElementById('projects-container');
     this.loadLocalBtn = document.getElementById('load-local-btn');
@@ -31,9 +23,6 @@ const ProjectsLoader = {
     this.initializeLocalStorage();
   },
 
-  /**
-   * Initialize localStorage with data from projects-local.json
-   */
   initializeLocalStorage() {
     const existingData = localStorage.getItem(this.LOCAL_STORAGE_KEY);
     if (!existingData) {
@@ -42,9 +31,6 @@ const ProjectsLoader = {
     }
   },
 
-  /**
-   * Fetch local JSON file and store in localStorage
-   */
   fetchLocalJSON() {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', 'projects-local.json', true);
@@ -70,9 +56,6 @@ const ProjectsLoader = {
     xhr.send();
   },
 
-  /**
-   * Load projects from localStorage
-   */
   loadLocal() {
     this.showLoading(true);
     this.updateStatus('Loading projects from local storage...', 'info');
@@ -105,9 +88,6 @@ const ProjectsLoader = {
     }, 500);
   },
 
-  /**
-   * Load projects from remote server using XMLHttpRequest
-   */
   loadRemote() {
     this.showLoading(true);
     this.updateStatus('Loading projects from remote server...', 'info');
@@ -159,10 +139,6 @@ const ProjectsLoader = {
     xhr.send();
   },
 
-  /**
-   * Render projects to the DOM
-   * @param {Array} projects - Array of project objects
-   */
   renderProjects(projects) {
     // Clear existing content
     this.container.innerHTML = '';
@@ -213,21 +189,13 @@ const ProjectsLoader = {
     });
   },
 
-  /**
-   * Show/hide loading indicator
-   * @param {boolean} show - Whether to show the loading indicator
-   */
   showLoading(show) {
     if (this.loadingIndicator) {
       this.loadingIndicator.style.display = show ? 'block' : 'none';
     }
   },
 
-  /**
-   * Update status message
-   * @param {string} message - Status message to display
-   * @param {string} type - Type of message ('info', 'success', 'error')
-   */
+
   updateStatus(message, type = 'info') {
     if (!this.statusDisplay) return;
 
@@ -238,10 +206,6 @@ const ProjectsLoader = {
       'var(--secondary-color)';
   },
 
-  /**
-   * Enable/disable load buttons
-   * @param {boolean} disabled - Whether to disable the buttons
-   */
   disableButtons(disabled) {
     if (this.loadLocalBtn) {
       this.loadLocalBtn.disabled = disabled;
