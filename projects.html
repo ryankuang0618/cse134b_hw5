@@ -5,10 +5,7 @@
   <title>Ryan's Portfolio — Projects</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/style.css">
-  <script>
-    class HelloConsole extends HTMLElement { connectedCallback(){ console.log('Hello world!'); } }
-    customElements.define('hello-console', HelloConsole);
-  </script>
+  <script src="js/project-card.js"></script>
 </head>
 <body>
   <header>
@@ -36,58 +33,62 @@
 
   <main id="content">
     <div class="container">
-      <h2 class="fade-in">Project Detail Page</h2>
+      <h2 class="fade-in">Projects</h2>
 
-      <section aria-labelledby="filter" class="fade-in">
-        <h3 id="filter">Find Project</h3>
-        <form role="search" class="contact-form">
-          <label for="q">Enter Project Name</label>
-          <input id="q" name="q" type="search" placeholder="Search…">
-          <button type="submit">Search</button>
-        </form>
+      <section aria-labelledby="data-controls" class="fade-in" style="margin-bottom: 2rem;">
+        <h3 id="data-controls" class="sr-only">Load Project Data</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; align-items: center;">
+          <button id="load-local-btn" class="data-load-btn" aria-label="Load projects from local storage">
+            📁 Load Local
+          </button>
+          <button id="load-remote-btn" class="data-load-btn" aria-label="Load projects from remote server">
+            🌐 Load Remote
+          </button>
+          <div id="loading-indicator" style="display: none; color: var(--primary-color); font-weight: 500;">
+            <span>Loading projects...</span>
+          </div>
+        </div>
+        <div id="data-status" role="status" aria-live="polite" style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--secondary-color);"></div>
       </section>
 
-      <projects-grid>
-        <section aria-labelledby="p1" class="fade-in">
-          <h3 id="p1">Smart Glasses</h3>
-          <project-card>
-            <article>
-              <h4>Project Overview</h4>
-              <p>Wearable device with real-time image translation and navigation using Python and GCP.</p>
-              <ul>
-                <li>Tech: Python, Firebase</li>
-                <li>Role: Developer</li>
-              </ul>
-            </article>
-          </project-card>
-        </section>
-
-        <section aria-labelledby="p2" class="fade-in">
-          <h3 id="p2">Financial Audit System</h3>
-          <project-card>
-            <article>
-              <h4>Project Overview</h4>
-              <p>ASP.NET MVC app with Oracle SQL and Kendo UI, used in a bank environment.</p>
-              <ol>
-                <li>Backend services with C#</li>
-                <li>Responsive UI with Kendo UI</li>
-              </ol>
-            </article>
-          </project-card>
-        </section>
-
-        <section aria-labelledby="p3" class="fade-in">
-          <h3 id="p3">TritonTube</h3>
-          <project-card>
-            <article>
-              <h4>Project Overview</h4>
-              <p>Distributed video storage using gRPC and consistent hashing.</p>
-            </article>
-          </project-card>
-        </section>
-      </projects-grid>
-
-      <hello-console></hello-console>
+      <div id="projects-container" role="region" aria-label="Projects list">
+        <project-card 
+        data-title="LoopGen For Runners" 
+        data-image="assets/images/loopgen4runners.jpg" 
+        data-description="This project builds an adaptive running-music system that predicts a runner’s future speed using physiological data and generates loopable music synchronized to the predicted BPM."
+        data-tech="Python, Long Short-Term Memory (LSTM) Network, Regression model"
+        data-role="ML Eningeer"
+        data-date="2025"
+        data-link="https://drive.google.com/file/d/14kR9AzBub-0iHCJIL3JRJKmGDrJDfSXe/view?usp=sharing"
+      ></project-card>
+      <project-card 
+        data-title="Floating Water Exploration Device" 
+        data-image="assets/images/floating_device.jpeg" 
+        data-description="A device that allows users to explore water bodies by floating on the surface. It is equipped with a camera and a Raspberry Pi to capture images and videos of the water body."
+        data-tech="C++, Raspberry Pi"
+        data-role="Software Developer"
+        data-date="2025"
+        data-link="https://docs.google.com/presentation/d/1ML7eFRLy8qpTW09_kd6yoAhq160GsMm1/edit?usp=sharing&ouid=107411627569541652450&rtpof=true&sd=true"
+      ></project-card>
+      <project-card 
+        data-title="UCSD Event Finder Website" 
+        data-image="assets/images/event_finder.png" 
+        data-description="A website that allows users to find events at UCSD. It is built with TypeScript, JavaScript, HTML, and CSS."
+        data-tech="TypeScript, JavaScript, HTML, CSS"
+        data-role="Frontend Developer"
+        data-date="2025"
+        data-link="https://github.com/ryankuang0618/CSE210-Event-Frontend"
+      ></project-card>
+      <project-card 
+        data-title="Smart Glasses" 
+        data-image="assets/images/smart_glasses.jpg" 
+        data-description="Wearable device with real-time image translation and navigation using Python and GCP."
+        data-tech="Python, Firebase, GCP"
+        data-role="Full-stack Developer"
+        data-date="2019-2020"
+        data-link="https://github.com/ryankuang0618/smartglasses_project"
+      ></project-card>
+      </div>
     </div>
   </main>
 
@@ -171,6 +172,7 @@
     </div>
   </div>
 
+  <script src="js/projects-loader.js"></script>
   <script src="js/theme-picker.js"></script>
   <script src="js/view-transitions.js"></script>
 </body>

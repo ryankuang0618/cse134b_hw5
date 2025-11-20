@@ -466,6 +466,56 @@ dialog::backdrop {
   transform: translateY(-2px);
 }
 
+  /* Data load buttons */
+  .data-load-btn {
+    background: linear-gradient(135deg, var(--primary-color, var(--primary-color-fallback)), var(--secondary-color));
+    color: var(--background-color);
+    border: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+    font-size: 1rem;
+  }
+  
+  .data-load-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+  
+  .data-load-btn:active {
+    transform: translateY(0);
+  }
+  
+  .data-load-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Projects container - Using CSS Grid */
+  #projects-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin: var(--spacing-xl) 0;
+    min-height: 200px;
+  }
+  
+  #projects-container:empty::after {
+    content: 'No projects loaded yet. Click "Load Local" or "Load Remote" to view projects.';
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--secondary-color);
+    padding: var(--spacing-2xl);
+    background: var(--background-color-fallback);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    font-style: italic;
+  }
+
   /* Project cards using CSS Grid - Using CSS Nesting */
   projects-grid {
     display: grid;
