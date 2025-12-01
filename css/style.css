@@ -156,6 +156,18 @@ a:hover {
   text-decoration: underline;
 }
 
+a:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 strong {
   font-weight: 600;
 }
@@ -268,6 +280,16 @@ nav {
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
       transform: translateY(-2px);
+    }
+    
+    &:focus {
+      outline: 3px solid rgba(255, 255, 255, 0.8);
+      outline-offset: 2px;
+    }
+    
+    &:focus-visible {
+      outline: 3px solid rgba(255, 255, 255, 0.8);
+      outline-offset: 2px;
     }
     
     &[aria-current="page"] {
@@ -467,33 +489,44 @@ dialog::backdrop {
 }
 
   /* Data load buttons */
-  .data-load-btn {
-    background: linear-gradient(135deg, var(--primary-color, var(--primary-color-fallback)), var(--secondary-color));
-    color: var(--background-color);
-    border: none;
-    padding: var(--spacing-md) var(--spacing-xl);
-    border-radius: var(--border-radius);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    position: relative;
-    overflow: hidden;
-    font-size: 1rem;
-  }
-  
-  .data-load-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  }
-  
-  .data-load-btn:active {
-    transform: translateY(0);
-  }
-  
-  .data-load-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+.data-load-btn {
+  background: linear-gradient(135deg, var(--primary-color, var(--primary-color-fallback)), var(--secondary-color));
+  color: var(--background-color);
+  border: none;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  font-size: 1rem;
+}
+
+.data-load-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.data-load-btn:focus {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
+.data-load-btn:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
+.data-load-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.data-load-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(30%);
+}
 
   /* Projects container - Using CSS Grid */
   #projects-container {
@@ -597,58 +630,101 @@ dialog::backdrop {
     font-weight: 500;
   }
   
-  input, textarea {
-    width: 100%;
-    padding: var(--spacing-sm);
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-family: inherit;
-    font-size: inherit;
-    transition: all var(--transition-base);
-  }
+input, textarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-family: inherit;
+  font-size: inherit;
+  transition: all var(--transition-base);
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+input:focus, textarea:focus {
+  outline: 3px solid var(--primary-color, var(--primary-color-fallback));
+  outline-offset: 2px;
+  border-color: var(--primary-color, var(--primary-color-fallback));
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--primary-color, var(--primary-color-fallback));
+  outline-offset: 2px;
+}
+
+input:disabled, textarea:disabled {
+  background: var(--border-color);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+input:invalid:not(:placeholder-shown), textarea:invalid:not(:placeholder-shown) {
+  border-color: #dc2626;
+}
+
+input:valid:not(:placeholder-shown), textarea:valid:not(:placeholder-shown) {
+  border-color: #16a34a;
+}
   
-  input:focus, textarea:focus {
-    outline: none;
-    border-color: var(--primary-color, var(--primary-color-fallback));
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
-  
-  button {
-    background: linear-gradient(135deg, var(--primary-color, var(--primary-color-fallback)), var(--secondary-color));
-    color: var(--background-color);
-    border: none;
-    padding: var(--spacing-sm) var(--spacing-lg);
-    border-radius: var(--border-radius);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left var(--transition-slow);
-  }
-  
-  button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  }
-  
-  button:hover::before {
-    left: 100%;
-  }
-  
-  button:active {
-    transform: translateY(0);
-  }
+button {
+  background: linear-gradient(135deg, var(--primary-color, var(--primary-color-fallback)), var(--secondary-color));
+  color: var(--background-color);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-slow);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+button:hover::before {
+  left: 100%;
+}
+
+button:focus {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
 
   .content-grid {
     display: grid;
