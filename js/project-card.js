@@ -104,16 +104,51 @@ class ProjectCard extends HTMLElement {
           color: var(--text-color, #1e293b);
         }
 
+        .image-container {
+          position: relative;
+          width: 100%;
+          height: 200px;
+          margin-bottom: 1rem;
+          border-radius: 0.5rem;
+          overflow: hidden;
+          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
         .project-image {
           width: 100%;
           height: 200px;
           object-fit: cover;
           border-radius: 0.5rem;
-          margin-bottom: 1rem;
-          background: var(--background-color-fallback, #f8fafc);
+          opacity: 0;
+          transition: opacity 0.4s ease-in;
         }
 
-        .project-image[src=""], .project-image:not([src]) {
+        .project-image.loaded {
+          opacity: 1;
+        }
+
+        .project-image.error {
+          opacity: 0.5;
+          object-fit: contain;
+        }
+
+        .image-placeholder {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 3rem;
+          opacity: 0.3;
+        }
+
+        .image-container[data-hidden="true"] {
           display: none;
         }
 
@@ -232,7 +267,18 @@ class ProjectCard extends HTMLElement {
           ${date ? `<div class="meta-info"><span class="meta-item">📅 ${date}</span></div>` : ''}
         </div>
 
-        ${image ? `<img src="${image}" alt="${title} project screenshot" class="project-image" loading="lazy">` : ''}
+        ${image ? `
+          <div class="image-container" data-hidden="${!image}">
+            <div class="image-placeholder">🖼️</div>
+            <img 
+              data-src="${image}" 
+              alt="${title} project screenshot" 
+              class="project-image"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+        ` : ''}
 
         <p class="description">${description}</p>
 
@@ -246,6 +292,68 @@ class ProjectCard extends HTMLElement {
         ${link !== '#' ? `<a href="${link}" class="project-link" target="_blank" rel="noopener noreferrer">View Project</a>` : ''}
       </article>
     `;
+
+    this.setupLazyLoading();
+  }
+
+  setupLazyLoading() {
+    const img = this.shadowRoot.querySelector('.project-image');
+    if (!img) return;
+
+    const imageSrc = img.getAttribute('data-src');
+    if (!imageSrc) return;
+
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const image = entry.target;
+            this.loadImage(image, imageSrc);
+            observer.unobserve(image);
+          }
+        });
+      }, {
+        rootMargin: '50px'
+      });
+
+      imageObserver.observe(img);
+    } else {
+      this.loadImage(img, imageSrc);
+    }
+  }
+
+  loadImage(img, src) {
+    const tempImg = new Image();
+    
+    tempImg.onload = () => {
+      img.src = src;
+      img.classList.add('loaded');
+      const placeholder = this.shadowRoot.querySelector('.image-placeholder');
+      if (placeholder) {
+        placeholder.style.display = 'none';
+      }
+      const container = this.shadowRoot.querySelector('.image-container');
+      if (container) {
+        container.style.animation = 'none';
+        container.style.background = 'transparent';
+      }
+    };
+
+    tempImg.onerror = () => {
+      img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f0f0f0" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-family="Arial" font-size="18"%3EImage not found%3C/text%3E%3C/svg%3E';
+      img.classList.add('loaded', 'error');
+      const placeholder = this.shadowRoot.querySelector('.image-placeholder');
+      if (placeholder) {
+        placeholder.textContent = '❌';
+      }
+      const container = this.shadowRoot.querySelector('.image-container');
+      if (container) {
+        container.style.animation = 'none';
+        container.style.background = '#f8f8f8';
+      }
+    };
+
+    tempImg.src = src;
   }
 }
 

@@ -686,6 +686,17 @@ dialog::backdrop {
   }
 }
 
+img {
+  will-change: opacity;
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+img[loading="lazy"] {
+  content-visibility: auto;
+}
+
   /* Project cards using CSS Grid - Using CSS Nesting */
   projects-grid {
     display: grid;
