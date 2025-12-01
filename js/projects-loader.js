@@ -83,7 +83,7 @@ const ProjectsLoader = {
           this.updateStatus('ℹ️ No projects in local storage. Add some using the CRUD page!', 'info');
         } else {
           this.renderProjects(projects);
-          this.updateStatus(`✓ Successfully loaded ${projects.length} project${projects.length !== 1 ? 's' : ''} from local storage`, 'success');
+          this.updateStatus(`Successfully loaded ${projects.length} project${projects.length !== 1 ? 's' : ''} from local storage`, 'success');
         }
         
         this.showLoading(false);
@@ -99,7 +99,7 @@ const ProjectsLoader = {
 
   loadRemote() {
     this.showLoading(true);
-    this.updateStatus('🌐 Connecting to remote server...', 'info');
+    this.updateStatus('Connecting to remote server...', 'info');
     this.disableButtons(true);
 
     const xhr = new XMLHttpRequest();
@@ -116,7 +116,7 @@ const ProjectsLoader = {
           
           if (Array.isArray(projects) && projects.length > 0) {
             this.renderProjects(projects);
-            this.updateStatus(`✓ Successfully loaded ${projects.length} project${projects.length !== 1 ? 's' : ''} from remote server`, 'success');
+            this.updateStatus(`Successfully loaded ${projects.length} project${projects.length !== 1 ? 's' : ''} from remote server`, 'success');
           } else if (Array.isArray(projects) && projects.length === 0) {
             this.renderProjects(projects);
             this.updateStatus('ℹ️ Remote server returned no projects', 'info');
