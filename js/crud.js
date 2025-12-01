@@ -117,6 +117,8 @@ const ProjectCRUD = {
       return;
     }
 
+    this.showMessage('🌐 Loading remote projects...', 'info');
+
     const xhr = new XMLHttpRequest();
     xhr.open('GET', this.REMOTE_URL, true);
 
@@ -127,18 +129,37 @@ const ProjectCRUD = {
           this.remoteCache = [...projects];
           this.displayProjects(this.remoteCache);
           this.populateSelectDropdown(this.remoteCache);
+          this.showMessage(`✓ Loaded ${projects.length} projects from remote server`, 'success');
         } catch (error) {
-          this.showMessage('❌ Error loading remote data', 'error');
+          console.error('Parse error:', error);
+          this.showMessage('❌ Error parsing remote data. Please check the server.', 'error');
+          this.displayProjects([]);
+          this.populateSelectDropdown([]);
         }
+      } else if (xhr.status === 404) {
+        this.showMessage('❌ Remote data not found (404). Please check the URL.', 'error');
+        this.displayProjects([]);
+        this.populateSelectDropdown([]);
       } else {
-        this.showMessage('❌ Failed to load remote data', 'error');
+        this.showMessage(`❌ Failed to load remote data (HTTP ${xhr.status})`, 'error');
+        this.displayProjects([]);
+        this.populateSelectDropdown([]);
       }
     };
 
     xhr.onerror = () => {
-      this.showMessage('❌ Network error', 'error');
+      this.showMessage('❌ Network error. Check your internet connection.', 'error');
+      this.displayProjects([]);
+      this.populateSelectDropdown([]);
     };
 
+    xhr.ontimeout = () => {
+      this.showMessage('❌ Request timeout. Server took too long to respond.', 'error');
+      this.displayProjects([]);
+      this.populateSelectDropdown([]);
+    };
+
+    xhr.timeout = 10000;
     xhr.send();
   },
 
@@ -184,10 +205,16 @@ const ProjectCRUD = {
 
   createProject() {
     const formData = new FormData(this.createForm);
+    
+    if (!formData.get('title') || !formData.get('description')) {
+      this.showMessage('❌ Title and description are required fields', 'error');
+      return;
+    }
+
     const newProject = {
       id: Date.now(),
-      title: formData.get('title'),
-      description: formData.get('description'),
+      title: formData.get('title').trim(),
+      description: formData.get('description').trim(),
       image: formData.get('image') || '',
       tech: formData.get('tech') || '',
       role: formData.get('role') || '',
@@ -195,25 +222,30 @@ const ProjectCRUD = {
       link: formData.get('link') || ''
     };
 
-    if (this.currentSource === 'local') {
-      const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
-      const projects = data ? JSON.parse(data) : [];
+    try {
+      if (this.currentSource === 'local') {
+        const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
+        const projects = data ? JSON.parse(data) : [];
 
-      projects.push(newProject);
-      localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(projects));
+        projects.push(newProject);
+        localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(projects));
 
-      this.createForm.reset();
-      this.loadProjects();
-      this.showMessage(`✓ Project "${newProject.title}" created in Local Storage!`, 'success');
-    } else {
-      if (!this.remoteCache) {
-        this.remoteCache = [];
+        this.createForm.reset();
+        this.loadProjects();
+        this.showMessage(`✓ Project "${newProject.title}" created successfully in local storage!`, 'success');
+      } else {
+        if (!this.remoteCache) {
+          this.remoteCache = [];
+        }
+        this.remoteCache.push(newProject);
+        this.simulateRemoteCreate(newProject);
+        this.createForm.reset();
+        this.loadProjects();
+        this.showMessage(`✓ Project "${newProject.title}" created and cached for this session!`, 'success');
       }
-      this.remoteCache.push(newProject);
-      this.simulateRemoteCreate(newProject);
-      this.createForm.reset();
-      this.loadProjects();
-      this.showMessage(`✓ Project "${newProject.title}" created (cached for session)!`, 'success');
+    } catch (error) {
+      console.error('Error creating project:', error);
+      this.showMessage('❌ Failed to create project. Please try again.', 'error');
     }
   },
 
@@ -267,14 +299,20 @@ const ProjectCRUD = {
     const selectedIndex = this.selectProject.value;
     
     if (selectedIndex === '') {
-      this.showMessage('❌ Please select a project to update', 'error');
+      this.showMessage('❌ Please select a project from the dropdown first', 'error');
       return;
     }
 
     const formData = new FormData(this.updateForm);
+    
+    if (!formData.get('title') || !formData.get('description')) {
+      this.showMessage('❌ Title and description cannot be empty', 'error');
+      return;
+    }
+
     const updatedProject = {
-      title: formData.get('title'),
-      description: formData.get('description'),
+      title: formData.get('title').trim(),
+      description: formData.get('description').trim(),
       image: formData.get('image') || '',
       tech: formData.get('tech') || '',
       role: formData.get('role') || '',
@@ -282,27 +320,34 @@ const ProjectCRUD = {
       link: formData.get('link') || ''
     };
 
-    if (this.currentSource === 'local') {
-      const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
-      const projects = data ? JSON.parse(data) : [];
+    try {
+      if (this.currentSource === 'local') {
+        const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
+        const projects = data ? JSON.parse(data) : [];
 
-      const index = parseInt(selectedIndex);
-      updatedProject.id = projects[index].id;
-      projects[index] = updatedProject;
+        const index = parseInt(selectedIndex);
+        updatedProject.id = projects[index].id;
+        projects[index] = updatedProject;
 
-      localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(projects));
+        localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(projects));
 
-      this.loadProjects();
-      this.showMessage(`✓ Project "${updatedProject.title}" updated in Local Storage!`, 'success');
-    } else {
-      const index = parseInt(selectedIndex);
-      if (this.remoteCache && this.remoteCache[index]) {
-        updatedProject.id = this.remoteCache[index].id;
-        this.remoteCache[index] = updatedProject;
-        this.simulateRemoteUpdate(updatedProject);
         this.loadProjects();
-        this.showMessage(`✓ Project "${updatedProject.title}" updated (cached)!`, 'success');
+        this.showMessage(`✓ Project "${updatedProject.title}" has been updated successfully!`, 'success');
+      } else {
+        const index = parseInt(selectedIndex);
+        if (this.remoteCache && this.remoteCache[index]) {
+          updatedProject.id = this.remoteCache[index].id;
+          this.remoteCache[index] = updatedProject;
+          this.simulateRemoteUpdate(updatedProject);
+          this.loadProjects();
+          this.showMessage(`✓ Project "${updatedProject.title}" updated in cache!`, 'success');
+        } else {
+          this.showMessage('❌ Could not find project to update', 'error');
+        }
       }
+    } catch (error) {
+      console.error('Error updating project:', error);
+      this.showMessage('❌ Failed to update project. Please try again.', 'error');
     }
   },
 
@@ -324,45 +369,63 @@ const ProjectCRUD = {
     const selectedIndex = this.selectProject.value;
     
     if (selectedIndex === '') {
-      this.showMessage('❌ Please select a project to delete', 'error');
+      this.showMessage('❌ Please select a project from the dropdown first', 'error');
       return;
     }
 
     let projectToDelete;
 
-    if (this.currentSource === 'local') {
-      const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
-      const projects = data ? JSON.parse(data) : [];
+    try {
+      if (this.currentSource === 'local') {
+        const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
+        const projects = data ? JSON.parse(data) : [];
 
-      const index = parseInt(selectedIndex);
-      projectToDelete = projects[index];
+        const index = parseInt(selectedIndex);
+        projectToDelete = projects[index];
 
-      const confirmed = confirm(`Are you sure you want to delete "${projectToDelete.title}"?`);
-      
-      if (!confirmed) return;
+        if (!projectToDelete) {
+          this.showMessage('❌ Project not found', 'error');
+          return;
+        }
 
-      projects.splice(index, 1);
-      localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(projects));
-
-      this.clearUpdateForm();
-      this.selectProject.value = '';
-      this.loadProjects();
-      this.showMessage(`✓ Project "${projectToDelete.title}" deleted from Local Storage!`, 'success');
-    } else {
-      const index = parseInt(selectedIndex);
-      if (this.remoteCache && this.remoteCache[index]) {
-        projectToDelete = this.remoteCache[index];
+        const confirmed = confirm(`Are you sure you want to delete "${projectToDelete.title}"?\n\nThis action cannot be undone.`);
         
-        const confirmed = confirm(`Are you sure you want to delete "${projectToDelete.title}"?`);
-        if (!confirmed) return;
-        
-        this.simulateRemoteDelete(projectToDelete.id);
-        this.remoteCache.splice(index, 1);
+        if (!confirmed) {
+          this.showMessage('ℹ️ Deletion cancelled', 'info');
+          return;
+        }
+
+        projects.splice(index, 1);
+        localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(projects));
+
         this.clearUpdateForm();
         this.selectProject.value = '';
         this.loadProjects();
-        this.showMessage(`✓ Project "${projectToDelete.title}" deleted (cached)!`, 'success');
+        this.showMessage(`✓ Project "${projectToDelete.title}" has been deleted successfully!`, 'success');
+      } else {
+        const index = parseInt(selectedIndex);
+        if (this.remoteCache && this.remoteCache[index]) {
+          projectToDelete = this.remoteCache[index];
+          
+          const confirmed = confirm(`Are you sure you want to delete "${projectToDelete.title}"?\n\nNote: This only removes from cache.`);
+          if (!confirmed) {
+            this.showMessage('ℹ️ Deletion cancelled', 'info');
+            return;
+          }
+          
+          this.simulateRemoteDelete(projectToDelete.id);
+          this.remoteCache.splice(index, 1);
+          this.clearUpdateForm();
+          this.selectProject.value = '';
+          this.loadProjects();
+          this.showMessage(`✓ Project "${projectToDelete.title}" removed from cache!`, 'success');
+        } else {
+          this.showMessage('❌ Could not find project to delete', 'error');
+        }
       }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      this.showMessage('❌ Failed to delete project. Please try again.', 'error');
     }
   },
 
@@ -382,14 +445,20 @@ const ProjectCRUD = {
   showMessage(message, type = 'info') {
     if (!this.statusMessage) return;
 
+    const messageClass = 
+      type === 'success' ? 'success-message' :
+      type === 'error' ? 'error-message' :
+      'info-message';
+
+    this.statusMessage.className = messageClass;
     this.statusMessage.textContent = message;
-    this.statusMessage.className = type;
 
     setTimeout(() => {
-      this.statusMessage.style.display = 'none';
+      this.statusMessage.classList.add('fade-out');
       setTimeout(() => {
         this.statusMessage.className = '';
         this.statusMessage.textContent = '';
+        this.statusMessage.classList.remove('fade-out');
       }, 300);
     }, 5000);
   }

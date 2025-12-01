@@ -46,11 +46,10 @@
           <button id="load-remote-btn" class="data-load-btn" aria-label="Load projects from remote server">
             🌐 Load Remote
           </button>
-          <div id="loading-indicator" style="display: none; color: var(--primary-color); font-weight: 500;">
-            <span>Loading projects...</span>
+          <div id="loading-indicator" style="display: none; color: var(--primary-color); font-weight: 500; align-items: center; gap: 0.5rem;">
           </div>
         </div>
-        <div id="data-status" role="status" aria-live="polite" style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--secondary-color);"></div>
+        <div id="data-status" role="status" aria-live="polite" style="display: none;"></div>
       </section>
 
       <div id="projects-container" role="region" aria-label="Projects list"></div>

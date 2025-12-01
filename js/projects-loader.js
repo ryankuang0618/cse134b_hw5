@@ -61,22 +61,31 @@ const ProjectsLoader = {
     this.updateStatus('Loading projects from local storage...', 'info');
     this.disableButtons(true);
 
-    // Simulate async operation
     setTimeout(() => {
       try {
         const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
         
         if (!data) {
-          this.updateStatus('No local data found. Initializing...', 'error');
+          this.showLoading(false);
+          this.updateStatus('⚠️ No local data found. Initializing from file...', 'error');
           this.initializeLocalStorage();
-          // Try again after initialization
-          setTimeout(() => this.loadLocal(), 500);
+          setTimeout(() => {
+            this.disableButtons(false);
+            this.loadLocal();
+          }, 1000);
           return;
         }
 
         const projects = JSON.parse(data);
-        this.renderProjects(projects);
-        this.updateStatus(`✓ Successfully loaded ${projects.length} projects from local storage`, 'success');
+        
+        if (projects.length === 0) {
+          this.renderProjects(projects);
+          this.updateStatus('ℹ️ No projects in local storage. Add some using the CRUD page!', 'info');
+        } else {
+          this.renderProjects(projects);
+          this.updateStatus(`✓ Successfully loaded ${projects.length} project${projects.length !== 1 ? 's' : ''} from local storage`, 'success');
+        }
+        
         this.showLoading(false);
         this.disableButtons(false);
       } catch (error) {
@@ -90,7 +99,7 @@ const ProjectsLoader = {
 
   loadRemote() {
     this.showLoading(true);
-    this.updateStatus('Loading projects from remote server...', 'info');
+    this.updateStatus('🌐 Connecting to remote server...', 'info');
     this.disableButtons(true);
 
     const xhr = new XMLHttpRequest();
@@ -107,34 +116,39 @@ const ProjectsLoader = {
           
           if (Array.isArray(projects) && projects.length > 0) {
             this.renderProjects(projects);
-            this.updateStatus(`✓ Successfully loaded ${projects.length} projects from remote server`, 'success');
+            this.updateStatus(`✓ Successfully loaded ${projects.length} project${projects.length !== 1 ? 's' : ''} from remote server`, 'success');
+          } else if (Array.isArray(projects) && projects.length === 0) {
+            this.renderProjects(projects);
+            this.updateStatus('ℹ️ Remote server returned no projects', 'info');
           } else {
-            this.updateStatus('❌ No projects found on remote server', 'error');
+            this.updateStatus('❌ Invalid data format from remote server', 'error');
           }
         } catch (error) {
           console.error('Error parsing remote data:', error);
-          this.updateStatus('❌ Error parsing remote data: ' + error.message, 'error');
+          this.updateStatus('❌ Error parsing server response. Please try again.', 'error');
         }
+      } else if (xhr.status === 404) {
+        this.updateStatus('❌ Remote server not found (404). Check your connection.', 'error');
+      } else if (xhr.status === 500) {
+        this.updateStatus('❌ Server error (500). Please try again later.', 'error');
       } else {
-        this.updateStatus(`❌ Failed to load remote data (Status: ${xhr.status})`, 'error');
-        console.error('Remote request failed:', xhr.status, xhr.statusText);
+        this.updateStatus(`❌ Failed to load data (HTTP ${xhr.status}). Please try again.`, 'error');
       }
     };
 
     xhr.onerror = () => {
       this.showLoading(false);
       this.disableButtons(false);
-      this.updateStatus('❌ Network error: Could not connect to remote server', 'error');
+      this.updateStatus('❌ Network error: Could not connect to server. Check your internet connection.', 'error');
       console.error('Network error occurred');
     };
 
     xhr.ontimeout = () => {
       this.showLoading(false);
       this.disableButtons(false);
-      this.updateStatus('❌ Request timeout: Server took too long to respond', 'error');
+      this.updateStatus('❌ Connection timeout: Server is taking too long. Please try again.', 'error');
     };
 
-    // Set timeout to 10 seconds
     xhr.timeout = 10000;
     xhr.send();
   },
@@ -191,7 +205,10 @@ const ProjectsLoader = {
 
   showLoading(show) {
     if (this.loadingIndicator) {
-      this.loadingIndicator.style.display = show ? 'block' : 'none';
+      this.loadingIndicator.style.display = show ? 'flex' : 'none';
+      if (show) {
+        this.loadingIndicator.innerHTML = '<span class="loading-spinner"></span><span>Loading projects...</span>';
+      }
     }
   },
 
@@ -199,11 +216,28 @@ const ProjectsLoader = {
   updateStatus(message, type = 'info') {
     if (!this.statusDisplay) return;
 
+    const messageClass = 
+      type === 'success' ? 'success-message' :
+      type === 'error' ? 'error-message' :
+      'info-message';
+
+    this.statusDisplay.className = messageClass;
     this.statusDisplay.textContent = message;
-    this.statusDisplay.style.color = 
-      type === 'success' ? '#16a34a' :
-      type === 'error' ? '#dc2626' :
-      'var(--secondary-color)';
+    this.statusDisplay.style.display = 'block';
+
+    if (type === 'success' || type === 'info') {
+      setTimeout(() => {
+        if (this.statusDisplay) {
+          this.statusDisplay.classList.add('fade-out');
+          setTimeout(() => {
+            if (this.statusDisplay) {
+              this.statusDisplay.style.display = 'none';
+              this.statusDisplay.classList.remove('fade-out');
+            }
+          }, 300);
+        }
+      }, 5000);
+    }
   },
 
   disableButtons(disabled) {
