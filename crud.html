@@ -89,6 +89,9 @@
       cursor: pointer;
       transition: all var(--transition-base);
       font-size: 1rem;
+      -webkit-tap-highlight-color: rgba(37, 99, 235, 0.3);
+      touch-action: manipulation;
+      min-height: 44px;
     }
 
     .crud-btn:disabled {
@@ -246,14 +249,66 @@
     @media (max-width: 768px) {
       .crud-container {
         grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+
+      .crud-section {
+        padding: 1rem;
+      }
+
+      .crud-section h2 {
+        font-size: 1.25rem;
       }
 
       .btn-group {
         flex-direction: column;
+        gap: 0.5rem;
       }
 
       .crud-btn {
         width: 100%;
+        min-height: 48px;
+        font-size: 0.9375rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        padding: 0.75rem;
+        font-size: 16px;
+      }
+
+      .data-source-selector {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .source-btn {
+        width: 100%;
+        min-height: 48px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .crud-section {
+        padding: 0.875rem;
+      }
+
+      .crud-section h2 {
+        font-size: 1.125rem;
+      }
+
+      .form-group label {
+        font-size: 0.875rem;
+      }
+
+      .crud-btn {
+        font-size: 0.875rem;
+        padding: 0.75rem 1rem;
       }
     }
   </style>
