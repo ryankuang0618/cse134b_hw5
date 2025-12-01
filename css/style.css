@@ -928,6 +928,23 @@ dialog::backdrop {
   border: 0;
 }
 
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary-color);
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  z-index: 1001;
+  border-radius: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 .theme-toggle {
   background: rgba(255, 255, 255, 0.2);
   color: var(--background-color);
